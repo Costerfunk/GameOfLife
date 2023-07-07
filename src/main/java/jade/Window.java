@@ -18,12 +18,18 @@ public class Window {
     private String title;
     private long glfwWindow;
 
+    private float r, g, b, a;
+
     private static Window window = null;
 
     private Window() {
         this.width = 1280;
         this.height = 720;
         this.title = "Game of Life";
+        r = 0;
+        g = 0;
+        b = 0;
+        a = 0;
     }
 
     public static Window get() {
