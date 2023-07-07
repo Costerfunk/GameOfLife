@@ -4,6 +4,7 @@ import org.lwjgl.*;
 import org.lwjgl.glfw.*;
 import org.lwjgl.opengl.*;
 import org.lwjgl.system.*;
+import util.Time;
 
 import java.nio.*;
 
@@ -18,12 +19,37 @@ public class Window {
     private String title;
     private long glfwWindow;
 
+    public float r, g, b, a;
+    private boolean fadeToBlack = false;
+
     private static Window window = null;
+
+    private static Scene currentScene;
 
     private Window() {
         this.width = 1280;
         this.height = 720;
         this.title = "Game of Life";
+        r = 1;
+        g = 1;
+        b = 1;
+        a = 1;
+    }
+
+    public static void changeScene(int newScene){
+        switch(newScene){
+            case 0:
+                currentScene = new LevelEditorScene();
+                //currentScene.init();
+                break;
+            case 1:
+                currentScene = new LevelScene();
+                //currentScene.init();
+                break;
+            default:
+                assert false : "Unknown scene '" + newScene + "'";
+                break;
+        }
     }
 
     public static Window get() {
@@ -35,7 +61,7 @@ public class Window {
     }
 
     public void run() {
-        System.out.println("Hellow LWJGL " + Version.getVersion() + "!");
+        System.out.println("Hello LWJGL " + Version.getVersion() + "!");
 
         init();
         loop();
@@ -73,6 +99,7 @@ public class Window {
         glfwSetScrollCallback(glfwWindow, MouseListener::mouseScrollCallback);
         glfwSetKeyCallback(glfwWindow, KeyListener::keyCallback);
 
+
         // Make the OpenGL context current
         glfwMakeContextCurrent(glfwWindow);
         // Enable v-sync
@@ -83,21 +110,32 @@ public class Window {
 
         // Super-duper important
         GL.createCapabilities();
+
+        Window.changeScene(0);
     }
 
     public void loop(){
+
+        float beginTime = Time.getTime();
+        float endTime;
+        float dt = -1.0f;
+
         while(!glfwWindowShouldClose(glfwWindow)){
             // Poll events
             glfwPollEvents();
 
-            glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+            glClearColor(r, g, b, a);
             glClear(GL_COLOR_BUFFER_BIT);
 
-            if(KeyListener.isKeyPressed(GLFW_KEY_SPACE)){
-                System.out.println("SPACE PRESSED");
+            if(dt >= 0) {
+                currentScene.update(dt);
             }
 
             glfwSwapBuffers(glfwWindow);
+
+            endTime = Time.getTime();
+            dt = endTime - beginTime;
+            beginTime = endTime;
         }
     }
 }
