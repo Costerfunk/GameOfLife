@@ -1,6 +1,10 @@
 package renderer;
 
+import org.joml.Matrix4f;
+import org.lwjgl.BufferUtils;
+
 import java.io.IOException;
+import java.nio.FloatBuffer;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
@@ -41,9 +45,9 @@ public class Shader {
             }
 
             if(secondPattern.equals("vertex")){
-                vertexSource = splitString[1];
+                vertexSource = splitString[2];
             } else if(secondPattern.equals("fragment")){
-                fragmentSource = splitString[1];
+                fragmentSource = splitString[2];
             } else {
                 throw new IOException("Unexpected token '" + secondPattern + "'");
             }
@@ -52,10 +56,6 @@ public class Shader {
             e.printStackTrace();
             assert false : "Error: Could not open file for shader: " + filepath;
         }
-
-        System.out.println(vertexSource);
-        System.out.println(fragmentSource);
-
     }
 
     public void compile(){
@@ -112,10 +112,18 @@ public class Shader {
     }
 
     public void use() {
-
+        // Bind shader program
+        glUseProgram(shaderProgramID);
     }
 
     public void detach() {
+        glUseProgram(0);
+    }
 
+    public void uploadMat4f(String varName, Matrix4f mat4) {
+        int varLocation = glGetUniformLocation(shaderProgramID, varName);
+        FloatBuffer matBuffer = BufferUtils.createFloatBuffer(16);
+        mat4.get(matBuffer);
+        glUniformMatrix4fv(varLocation, false, matBuffer);
     }
 }
