@@ -3,6 +3,7 @@ package jade;
 import org.joml.Vector2f;
 import org.lwjgl.BufferUtils;
 import renderer.Shader;
+import renderer.Texture;
 import util.Time;
 
 import java.nio.FloatBuffer;
@@ -40,10 +41,10 @@ public class LevelEditorScene extends Scene{
 
     private float[] vertexArray = {
             // position                  // color                   // UV Coordinates
-            100.5f,   -0.5f,  0.0f,      1.0f, 0.0f, 0.0f, 1.0f,    1, 0,   // Bottom right
-            -0.5f,  100.5f,   0.0f,      0.0f, 1.0f, 0.0f, 1.0f,    0, 1,   // Top left
-            100.5f,   100.5f,   0.0f,    0.0f, 0.0f, 1.0f, 1.0f,    1, 1,   // Top right
-            -0.5f,  -0.5f,  0.0f,        1.0f, 1.0f, 0.0f, 1.0f,    0, 0    // Bottom left
+            500.0f,   0.0f,  0.0f,      1.0f, 0.0f, 0.0f, 1.0f,    1, 0,   // Bottom right
+            0.0f,  500.0f,   0.0f,      0.0f, 1.0f, 0.0f, 1.0f,    0, 1,   // Top left
+            500.0f,   500.0f,   0.0f,    0.0f, 0.0f, 1.0f, 1.0f,    1, 1,   // Top right
+            0.0f,  0.0f,  0.0f,        1.0f, 1.0f, 0.0f, 1.0f,    0, 0    // Bottom left
     };
 
     // IMPORTANT: Counter clockwise order
@@ -55,6 +56,7 @@ public class LevelEditorScene extends Scene{
     private int vaoID, vboID, eboID;
 
     private Shader defaultShader;
+    private Texture testTexture;
 
     public LevelEditorScene(){
 
@@ -65,6 +67,7 @@ public class LevelEditorScene extends Scene{
         this.camera = new Camera(new Vector2f());
         defaultShader = new Shader("assets/shaders/default.glsl");
         defaultShader.compile();
+        this.testTexture = new Texture("assets/images/testImage.jpg");
 
         // COMPILE AND LINK SHADERS
 
@@ -153,10 +156,14 @@ public class LevelEditorScene extends Scene{
 
     @Override
     public void update(float dt) {
-        camera.position.x -= dt * 50.0f;
-        camera.position.y -= dt * 50.f;
 
         defaultShader.use();
+
+        // Upload texture to shader
+        defaultShader.uploadTexture("TEX_SAMPLER", 0);
+        glActiveTexture(GL_TEXTURE0);
+        testTexture.bind();
+
         defaultShader.uploadMat4f("uProjection", camera.getProjectionMatrix());
         defaultShader.uploadMat4f("uView", camera.getViewMatrix());
         defaultShader.uploadFloat("uTime", Time.getTime());
